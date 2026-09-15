@@ -272,7 +272,7 @@ namespace Robust.Client.UserInterface.Controls
             var panel = _getPanel();
             var panelSize = (panel?.MinimumSize ?? Vector2.Zero);
 
-            var contentsSize = availableSize - headerSize - panelSize;
+            var contentsSize = Vector2.Max(availableSize - headerSize - panelSize, Vector2.Zero);
 
             var total = Vector2.Zero;
             foreach (var child in Children)
@@ -295,9 +295,11 @@ namespace Robust.Client.UserInterface.Controls
                 return finalSize;
             }
 
-            var headerSize = (int)_enclosingTabHeight;
+            var pixelWidth = (int) (finalSize.X * UIScale);
+            var pixelHeight = (int) (finalSize.Y * UIScale);
+            var headerSize = Math.Min((int) _enclosingTabHeight, pixelHeight);
             var panel = _getPanel();
-            var contentBox = new UIBox2i(0, headerSize, (int) (finalSize.X * UIScale), (int) (finalSize.Y * UIScale));
+            var contentBox = new UIBox2i(0, headerSize, pixelWidth, pixelHeight);
             if (panel != null)
             {
                 contentBox = (UIBox2i) panel.GetContentBox(contentBox, UIScale);
