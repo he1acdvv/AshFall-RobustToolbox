@@ -604,12 +604,9 @@ namespace Robust.Shared.GameObjects
                 if (xform.LifeStage < ComponentLifeStage.Initialized)
                 {
                     // Entity is being deleted before initialization ever finished.
-                    // The entity will not yet have been added to the parent's transform component.
-                    // This is seemingly pretty error prone ATM, and I'm not even sure if it should be supported?
-
-                    // Just in case it HAS somehow been added, make sure we remove it.
-                    if (TransformQuery.TryComp(xform.ParentUid, out parentXform) && parentXform._children.Remove(e))
-                        DebugTools.Assert($"Child entity {ToPrettyString(e)} was added to the parent's child set prior to being initialized?");
+                    // If it was created with coordinates, it will have already been added to the parent's transform component.
+                    if (TransformQuery.TryComp(xform.ParentUid, out parentXform))
+                        parentXform._children.Remove(e);
 
                     parentXform = null;
                     xform._parent = EntityUid.Invalid;
