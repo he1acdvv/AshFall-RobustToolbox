@@ -98,6 +98,27 @@ internal sealed partial class DeferredEntityDeletionTest : RobustIntegrationTest
         await server.WaitIdleAsync();
     }
 
+    [Test]
+    public async Task TestPreInitEntityWithCoordinatesDeletion()
+    {
+        var server = StartServer();
+        await server.WaitIdleAsync();
+
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var mapSys = entMan.System<SharedMapSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var map = mapSys.CreateMap(out var mapId);
+            var uninitMap = entMan.CreateEntityUninitialized(null, new MapCoordinates(0, 0, mapId));
+            Assert.DoesNotThrow(() => entMan.DeleteEntity(uninitMap));
+
+            var parent = entMan.SpawnEntity(null, new MapCoordinates(0, 0, mapId));
+            var uninitChild = entMan.CreateEntityUninitialized(null, new EntityCoordinates(parent, 0, 0));
+            Assert.DoesNotThrow(() => entMan.DeleteEntity(uninitChild));
+        });
+    }
+
     [Reflect(false)]
     private sealed class DeferredDeletionTestSystem : EntitySystem
     {
